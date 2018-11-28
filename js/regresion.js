@@ -1,63 +1,63 @@
-function regresion(data) {
-  var coefs;        //Atrreglo que contiene coeficientes del modelo a0, a1, a2....
-  var Se = 0, St = 0, yAvg = 0; //
+var data = [[0,1,2,3,4,5],[2.1,7.7,13.6,27.2,40.9,61.1]];
+var reg = regresion(data,2);
+console.log(reg);
+
+
+function regresion(data, order) {
+  var coefs;
+  var Se = 0, St = 0;
   var errorStd, Rcuad;
-                                 //combinancion de las x y las y
-  var order = data.length - 1;  //numero de variable independientes, cuantas x hay
-  var n = data[0].length;       //numero de ecuaciones
-                                // numero de observaiones
-  var A = [];                   //se deja en blanco para luego ingresarse n datos
+  
+  var n = data[0].length;
+  
+  var A = [];
   for (var i=0; i<=order; i++) {
     A.push([]);
     for (var j=0; j<=order+1; j++)
       A[i].push(0);
-  }//inicia A vacio y luego lo llena con ceros
-       
-  var ones = [];
-  for (var i=0; i<n; i++) ones.push(1); //inicia A y lo llena con uno, parte de logaritno
+  }
   
-  var X = Array.from(data); //datos de data los guarda en X
-  var Y = X.pop();          //remover ultimo elemento del 
-  X.unshift(ones);          //tomar valores de ones y agregarlos primero que los que están en X
+  var X = Array.from(data).shift();
+  var Y = Array.from(data).pop();
   
   for (var i=0; i<= order; i++) {
     for (var j=0; j<=i; j++) {
       var sum = 0;
-      for (var l=0; l<n; l++) {
-        yAvg += Y[i] / n;
-        sum += X[i][l] * X[j][l];
-      }
+      var k = i + j;
+      for (var l=0; l<n; l++)
+        sum += Math.pow(X[l], k);
       A[i][j] = sum;
       A[j][i] = sum;
     }
     sum = 0;
     for (var l=0; l<n; l++)
-      sum += Y[l]*X[i][l];
+      sum += Y[l] * Math.pow(X[l], i);
     A[i][order+1] = sum;
   }
-  //23-37 fig 17.15 en libro
   
-  coefs = gauss(A); 
+  coefs = gauss(A);
   
   for (var i=0; i<n; i++) {
-    Se += Math.pow(Y[i]-sumprod(point(X,i),coefs),2);   //point parecida a gotoxy en c++
-    St += Math.pow(Y[i] - yAvg, 2);
+    Se += Math.pow(Y[i]-polinomio(X[i],coefs),2);
+    St += Math.pow(Y[i] - avg(Y), 2);
   }
+
+  return [coefs, Math.sqrt(Se/(n-order-1)), 1-Se/St];
   
-  return [coefs, Math.sqrt(Se/(n-order-1)), 1-Se/St]; //coeficientes, error estandar, R cuadrado
 }
 
-function point(X,pos) {
-  return X.reduce(function(XatPos,currX){
-    XatPos.push(currX[pos]);
-    return XatPos;
-  },[]);
+function polinomio(x, coefs) {
+  var sum = coefs[0];
+  for (var i=1; i<coefs.length; i++)
+    sum += coefs[i] * Math.pow(x, i);
+  return sum;
 }
 
-function sumprod(a,b){
-  return a.reduce(function(sum,x,i) {
-    return sum + x*b[i];
-  },0);
+function avg(X) {
+  var sum = 0; 
+  for (var i=0; i<X.length; i++)
+    sum += X[i]
+  return sum/X.length;
 }
 
 function gauss(A) {
