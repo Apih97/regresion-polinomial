@@ -1,7 +1,8 @@
+/*
 var data = [[0,1,2,3,4,5],[2.1,7.7,13.6,27.2,40.9,61.1]];
 var reg = regresion(data,2);
 console.log(reg);
-
+*/
 
 function regresion(data, order) {
   var coefs;
@@ -34,7 +35,7 @@ function regresion(data, order) {
       sum += Y[l] * Math.pow(X[l], i);
     A[i][order+1] = sum;
   }
-  
+  console.log(A);
   coefs = gauss(A);
   
   for (var i=0; i<n; i++) {
